@@ -4,14 +4,14 @@ import axios from "axios";
 import { API_URL } from "../../../helper";
 import { AiOutlineEye, AiOutlineEyeInvisible } from "react-icons/ai";
 import { useState } from "react";
-import { useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 
 const FormSection = () => {
-  const location = useLocation();
-
   const [eyeOpen, setEyeOpen] = useState(false);
   const [eyeOpen2, setEyeOpen2] = useState(false);
   const [isSubmitting, setisSubmitting] = useState(false);
+  const location = useLocation();
+  const navigate = useNavigate();
 
   const eyeStyle = {
     close: {
@@ -51,6 +51,7 @@ const FormSection = () => {
         });
         setisSubmitting(false);
         alert(result.data.message);
+        navigate("/sign-in");
         formik.resetForm();
       } catch (error) {
         alert(error.response.data.message);

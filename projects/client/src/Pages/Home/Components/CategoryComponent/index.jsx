@@ -9,10 +9,12 @@ const CategoryComponent = ({ branchName }) => {
 
   const fetchCategories = async () => {
     try {
-      const { data } = await axios.get(
-        `${API_URL}/product/categories?branch_name=${branchName}`
-      );
-      setCategoryList(data.data);
+      if (branchName) {
+        const { data } = await axios.get(
+          `${API_URL}/category/categories?branch_name=${branchName}`
+        );
+        setCategoryList(data.data);
+      }
     } catch (error) {
       alert(error.response.data.message);
     }
@@ -28,15 +30,29 @@ const CategoryComponent = ({ branchName }) => {
       {categoryList.map((category) => {
         return (
           <Link
-            key={category.category_id}
+            className="hover:bg-[#86C649] hover:rounded-md hover:text-white"
+            key={category.id}
             to={`/product-list`}
-            state={{ from: category.category_id }}
+            state={{ from: category.name }}
           >
-            <div className="box-content rounded h-16 w-16 bg-white text-xs text-center mx-2 my-2">
-              <img className="h-15 w-15 mx-auto my-2" src={img} alt="img" />
-              <div className="text-gray-500 text-center mt-2">
-                {category.category_id}
-              </div>
+            <div className="box-content rounded h-16 w-16 bg-white text-xs text-center mx-2 mt-2 mb-10">
+              {category.category_img === null ? (
+                <img
+                  className="rounded-md h-15 w-15 mx-auto my-2"
+                  src={img}
+                  alt="default"
+                />
+              ) : (
+                <img
+                  className="rounded-md h-15 w-15 mx-auto my-2"
+                  src={
+                    category.category_img &&
+                    `http://localhost:8000/${category.category_img}`
+                  }
+                  alt="category_img"
+                />
+              )}
+              <div className="text-center mt-2">{category.name}</div>
             </div>
           </Link>
         );

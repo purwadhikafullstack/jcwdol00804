@@ -283,4 +283,38 @@ module.exports = {
       return res.status(500).send(error);
     }
   },
+  validateAddOrEditProduct: async (req, res, next) => {
+    try {
+      const categoryList = await dbQuery(`SELECT c.name AS category_name
+      FROM product p
+      JOIN branch b ON p.branch_id= b.id
+      JOIN category c ON p.category_id = c.id
+      WHERE p.is_delete=0 AND b.name='${req.decript.branch_name}'
+      GROUP BY c.name`);
+      await check("category")
+        .isIn(categoryList.map((val) => val.category_name))
+        .notEmpty()
+        .run(req);
+      await check("product_name").isString().notEmpty().run(req);
+      await check("description")
+        .isString()
+        .isLength({ max: 255 })
+        .optional({ nullable: true })
+        .run(req);
+      await check("price").isNumeric().notEmpty().run(req);
+      await check("weight").isNumeric().notEmpty().run(req);
+      const validation = validationResult(req);
+      if (validation.isEmpty()) {
+        next();
+      } else {
+        return res.status(400).send({
+          success: false,
+          message: "Validation invalid ❌",
+          error: validation.errors,
+        });
+      }
+    } catch (error) {
+      return res.status(500).send(error);
+    }
+  },
 };

@@ -12,16 +12,17 @@ import { useDispatch } from "react-redux";
 import { logoutAction } from "../Actions/user";
 import { useNavigate } from "react-router-dom";
 import { useSelector } from "react-redux";
-import { Link } from "react-router-dom";
 import { Avatar } from "@chakra-ui/avatar";
+import toast, { Toaster } from "react-hot-toast";
 
-const Navbar = ({ navTitle, isLogged }) => {
+const Navbar = ({ navTitle }) => {
   const [nav, setNav] = useState(false);
-  const { id, profile_img, name } = useSelector((state) => {
+  const { id, profile_img, name, is_verified } = useSelector((state) => {
     return {
       id: state.userReducer.id,
       profile_img: state.userReducer.profile_img,
       name: state.userReducer.name,
+      is_verified: state.userReducer.is_verified,
     };
   });
   const navigate = useNavigate();
@@ -30,10 +31,12 @@ const Navbar = ({ navTitle, isLogged }) => {
     localStorage.removeItem("xmart_login");
     dispatch(logoutAction());
     navigate("/sign-in");
+    toast.remove();
   };
 
   return (
     <div className="flex flex-row justify-between items-center px-5 py-5">
+      <Toaster />
       <div>
         <div onClick={() => setNav(!nav)} className="cursor-pointer">
           <BiMenuAltLeft size={30} />
@@ -57,32 +60,64 @@ const Navbar = ({ navTitle, isLogged }) => {
             size={30}
             className="absolute right-5 top-5 cursor-pointer"
           />
-          <Link to="/">
+          <div
+            className="cursor-pointer"
+            onClick={() => {
+              navigate("/");
+              toast.remove();
+            }}
+          >
             <div className="text-xl font-bold py-5 px-2">Xmart</div>
-          </Link>
+          </div>
           <nav className="text-lg font-semibold px-2">
             <ul className="flex flex-col text-gray-600">
-              <Link to="/product-list">
+              <div
+                className="cursor-pointer"
+                onClick={() => {
+                  navigate("/product-list");
+                  toast.remove();
+                }}
+              >
                 <li className="flex py-2 items-center">
                   <BiShoppingBag size={24} className="mr-4" />
                   Products
                 </li>
-              </Link>
+              </div>
               {id && (
-                <Link to="/my-cart">
+                <div
+                  className="cursor-pointer"
+                  onClick={() => {
+                    if (!is_verified) {
+                      toast.error("Please verify your account first");
+                    } else {
+                      navigate("/my-cart");
+                      toast.remove();
+                    }
+                  }}
+                >
                   <li className="flex py-2 items-center">
                     <BiCartAlt size={24} className="mr-4" />
                     My Cart
                   </li>
-                </Link>
+                </div>
               )}
               {id && (
-                <Link to="/order-list">
+                <div
+                  className="cursor-pointer"
+                  onClick={() => {
+                    if (!is_verified) {
+                      toast.error("Please verify your account first");
+                    } else {
+                      navigate("/order-list");
+                      toast.remove();
+                    }
+                  }}
+                >
                   <li className="flex py-2 items-center">
                     <HiOutlineDocumentDuplicate size={24} className="mr-4" />
                     Order
                   </li>
-                </Link>
+                </div>
               )}
               {id ? (
                 <li
@@ -93,12 +128,17 @@ const Navbar = ({ navTitle, isLogged }) => {
                   Sign Out
                 </li>
               ) : (
-                <Link to="/sign-in">
+                <div
+                  onClick={() => {
+                    navigate("/sign-in");
+                    toast.remove();
+                  }}
+                >
                   <li className="flex py-2 items-center cursor-pointer">
                     <BiLogIn size={24} className="mr-4" />
                     Sign In
                   </li>
-                </Link>
+                </div>
               )}
             </ul>
           </nav>
@@ -114,12 +154,18 @@ const Navbar = ({ navTitle, isLogged }) => {
             borderRadius="50%"
             w="35px"
             h="35px"
-            onClick={() => navigate("/profile-setting")}
+            onClick={() => {
+              navigate("/profile-setting");
+              toast.remove();
+            }}
           />
         ) : (
           <button
             className="rounded-full bg-[#82CD47] w-14 text-white text-sm font-[600] py-1"
-            onClick={() => navigate("/sign-in")}
+            onClick={() => {
+              navigate("/sign-in");
+              toast.remove();
+            }}
           >
             Sign In
           </button>

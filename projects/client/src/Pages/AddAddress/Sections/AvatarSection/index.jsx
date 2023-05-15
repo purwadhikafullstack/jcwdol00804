@@ -12,7 +12,7 @@ const AvatarSection = () => {
   });
   return (
     <div className="flex flex-col m-auto">
-      <div className="flex flex-col justify-center items-center mt-10">
+      <div className="flex flex-col justify-center items-center mt-4">
         <Avatar
           className="w-[150px] h-[150px] bg-slate-300"
           borderRadius="20%"

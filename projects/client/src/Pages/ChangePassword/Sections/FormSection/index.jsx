@@ -3,14 +3,46 @@ import * as Yup from "yup";
 import axios from "axios";
 import { API_URL } from "../../../../helper";
 import { AiOutlineEye, AiOutlineEyeInvisible } from "react-icons/ai";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { useDispatch } from "react-redux";
+import { loginAction } from "../../../../Actions/user";
+import { getCartList } from "../../../../Actions/cart";
+import { useNavigate } from "react-router-dom";
+import toast, { Toaster } from "react-hot-toast";
 
 const FormSection = () => {
-
+    const dispatch = useDispatch();
+    const navigate = useNavigate();
     const [eyeOpen, setEyeOpen] = useState(false);
     const [eyeOpen2, setEyeOpen2] = useState(false);
     const [eyeOpen3, setEyeOpen3] = useState(false);
-    const [isSubmitting, setisSubmitting] = useState(false);
+    const [isSubmit, setIsSubmit] = useState(false);
+
+    const keepLogin = () => {
+        let getLocalStorage = localStorage.getItem("xmart_login");
+        if (getLocalStorage) {
+            axios.get(`${API_URL}/user/keep-login`, {
+                headers: {
+                    Authorization: `Bearer ${getLocalStorage}`,
+                },
+            })
+                .then((res) => {
+                    localStorage.setItem("xmart_login", res.data.token);
+                    dispatch(loginAction(res.data));
+                    dispatch(getCartList());
+                })
+                .catch((err) => {
+                    if (err.response.status === 401) {
+                        localStorage.removeItem("xmart_login");
+                    }
+                });
+        }
+    };
+
+    useEffect(() => {
+        keepLogin();
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
 
     const eyeStyle = {
         close: {
@@ -48,34 +80,34 @@ const FormSection = () => {
         }),
         onSubmit: async (values) => {
             try {
-                setisSubmitting(true);
                 const token = localStorage.getItem('xmart_login');
                 const result = await axios.patch(`${API_URL}/user/change-password`, values, {
                     headers: {
                         Authorization: `Bearer ${token}`
                     }
                 });
-                setisSubmitting(false);
-                alert(result.data.message);
+                toast.success(result.data.message);
                 formik.resetForm();
+                setIsSubmit(true);
+                keepLogin();
             } catch (error) {
-                alert(error.response.data.message);
+                toast.error(error.response.data.message);
             }
         },
     });
 
     return (
         <div className="flex flex-col justify-center mx-20 my-10">
-            <div className="text-xl font-bold">
-                Change Password
-            </div>
+            <Toaster />
+            <div className="text-xl font-bold mb-2">Change password</div>
+            <div className="h-[2px] bg-slate-200 w-[100%]"></div>
             <div className="flex flex-col items-center">
-                <div className="w-full mt-5">
+                <div className="w-full mt-2">
                     <form
                         onSubmit={formik.handleSubmit}
                         className="flex flex-col"
                     >
-                        <div className="w-full/12 relative mb-4">
+                        <div className="w-full/12 relative mb-2">
                             <label htmlFor="oldpassword" className="text-base font-semibold mt-2">
                                 Old Password
                             </label>
@@ -110,7 +142,7 @@ const FormSection = () => {
                                 </div>
                             )}
                         </div>
-                        <div className="w-full/12 relative">
+                        <div className="w-full/12 relative mb-2">
                             <label htmlFor="password" className="text-base font-semibold mt-2">
                                 New Password
                             </label>
@@ -145,7 +177,7 @@ const FormSection = () => {
                                 </div>
                             )}
                         </div>
-                        <div className="w-full/12 relative">
+                        <div className="w-full/12 relative mb-2">
                             <label
                                 htmlFor="confirmpassword"
                                 className="text-base font-semibold mt-2"
@@ -189,13 +221,21 @@ const FormSection = () => {
                                 )}
                         </div>
                         <div className="flex justify-center">
-                            <button
-                                type="submit"
-                                className="rounded-full bg-[#82CD47] w-8/12 h-[38px] text-white mt-6 text-[22px] font-[600] leading-6 shadow-md my-10"
-                                disabled={isSubmitting}
-                            >
-                                Submit
-                            </button>
+                            {!isSubmit ? (
+                                <button
+                                    type="submit"
+                                    className="rounded-full bg-[#82CD47] w-8/12 h-[38px] text-white mt-6 text-[22px] font-[600] leading-6 shadow-md my-10 hover:opacity-75"
+                                >
+                                    Submit
+                                </button>
+                            ) : (
+                                <button
+                                    className="rounded-full bg-[#82CD47] w-8/12 h-[38px] text-white mt-6 text-[22px] font-[600] leading-6 shadow-md my-10 hover:opacity-75"
+                                    onClick={() => navigate("/profile-setting")}
+                                >
+                                    Back
+                                </button>
+                            )}
                         </div>
                     </form>
                 </div>

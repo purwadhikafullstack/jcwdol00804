@@ -8,8 +8,9 @@ const {
   validateEditProfile,
 } = require("../config/validator");
 const { readToken } = require("../config/token");
-const { profileImgUploader } = require("../config/uploader");
+const { imgUploader } = require("../config/uploader");
 
+// User
 route.post("/sign-up", validateSignUp, userController.signUp);
 route.patch("/verify", readToken, userController.verifyEmail);
 route.post("/sign-in", validateSignIn, userController.signIn);
@@ -37,9 +38,13 @@ route.get("/unique-email/:email", userController.uniqueEmail);
 route.patch(
   "/upload-profile-img",
   readToken,
-  profileImgUploader("/imgProfile", "IMGPROFILE").array("images", 1),
+  imgUploader("/imgProfile", "IMGPROFILE").array("images", 1),
   userController.uploadProfileImg
 );
 route.get("/get-user-info", readToken, userController.getUserInfo);
+
+// Admin
+route.get("/get-branch-admin", userController.getBranchAdmin);
+route.post("/add-branch-admin", userController.addBranchAdmin);
 
 module.exports = route;
