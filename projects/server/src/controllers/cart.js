@@ -3,11 +3,13 @@ const { db, dbQuery } = require("../config/db");
 module.exports = {
   getCartList: (req, res) => {
     db.query(
-      `SELECT y.*, z.name, z.description, z.price, z.stock, z.weight, z.category_id, z.product_img, z.is_delete, b.name as branch_name, b.city as branch_cityname from cart x
-      JOIN cart_item y ON x.id = y.cart_id 
+      `SELECT y.*, z.name, z.description, z.price, z.stock, z.weight, z.category_id, z.product_img, z.is_delete, b.name as branch_name, b.city as branch_cityname 
+      FROM cart x
+      JOIN cart_item y ON x.user_id = y.cart_id 
       JOIN product z ON y.product_id = z.id 
       JOIN branch b ON z.branch_id = b.id 
-      WHERE x.id = ${req.decript.id} AND y.is_delete = 0;`,
+      WHERE x.user_id = ${req.decript.id} 
+      AND y.is_delete = 0;`,
       (err, result) => {
         if (err) {
           return res.status(404).send({

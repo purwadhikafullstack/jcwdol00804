@@ -17,39 +17,41 @@ const SettingSection = () => {
 
   return (
     <div className="flex flex-col justify-center mx-20 my-10">
-      <div className="text-xl font-bold">Settings</div>
-      <div className="flex justify-between text-base font-semibold mt-10 mb-3">
+      <div className="text-xl font-bold mb-2">Settings</div>
+      <div className="h-[2px] bg-slate-200 w-[100%] mb-2"></div>
+      <Link
+        className="flex justify-between px-2 font-semibold my-2"
+        to="/personal-data"
+      >
         <BiUser className="my-auto" size={25} />
         <div className="my-auto pl-2 pr-32">Personal Data</div>
-        <Link to="/personal-data">
-          <IoIosArrowForward className="my-auto" size={22} />
-        </Link>
-      </div>
-      <div className="flex justify-between text-base font-semibold my-3">
+        <IoIosArrowForward className="my-auto" size={22} />
+      </Link>
+      <Link
+        className="flex justify-between px-2 font-semibold my-3"
+        to="/change-password"
+      >
         <BiKey className="my-auto" size={25} />
         <div className="my-auto pl-4 pr-28">Change Password</div>
-        <Link to="/change-password">
-          <IoIosArrowForward className="my-auto" size={22} />
-        </Link>
-      </div>
-      <div className="flex justify-between text-base font-semibold my-3">
+        <IoIosArrowForward className="my-auto" size={22} />
+      </Link>
+      <Link
+        className="flex justify-between px-2 font-semibold my-3"
+        to="/my-address"
+      >
         <BiHome className="my-auto" size={25} />
         <div className="my-auto pl-2 pr-36">My Address</div>
-        <Link to="/my-address">
-          <IoIosArrowForward className="my-auto" size={22} />
-        </Link>
-      </div>
-      <div className="flex justify-between text-base font-semibold my-3">
+        <IoIosArrowForward className="my-auto" size={22} />
+      </Link>
+      <button className="flex justify-between px-2 font-semibold my-3">
         <BiLogOutCircle className="my-auto" size={25} />
         <div className="my-auto pr-40">Sign out</div>
-        <button>
-          <IoIosArrowForward
-            className="my-auto"
-            size={22}
-            onClick={logoutClick}
-          />
-        </button>
-      </div>
+        <IoIosArrowForward
+          className="my-auto"
+          size={22}
+          onClick={logoutClick}
+        />
+      </button>
     </div>
   );
 };

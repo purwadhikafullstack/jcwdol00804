@@ -14,12 +14,7 @@ import {
   TbSortAscendingNumbers,
   TbSortDescendingNumbers,
 } from "react-icons/tb";
-import {
-  MdKeyboardArrowLeft,
-  MdKeyboardDoubleArrowLeft,
-  MdKeyboardArrowRight,
-  MdKeyboardDoubleArrowRight,
-} from "react-icons/md";
+import Pagination from "../../Components/Pagination";
 import { format } from "date-fns";
 import axios from "axios";
 import { API_URL } from "../../helper";
@@ -33,8 +28,8 @@ const OrderList = () => {
   const [invoiceNo, setInvoiceNo] = useState("");
   const [status, setStatus] = useState("");
   const [page, setPage] = useState(1);
-  const [limit, setLimit] = useState(0);
   const [countResult, setCountResult] = useState(0);
+  const [limit, setLimit] = useState(1);
   const [openDate, setOpenDate] = useState(false);
   const [orderList, setOrderList] = useState([]);
   const token = localStorage.getItem("xmart_login");
@@ -42,7 +37,7 @@ const OrderList = () => {
 
   const [dateRange, setDateRange] = useState([
     {
-      startDate: subDays(new Date(), 7),
+      startDate: subDays(new Date(), 31),
       endDate: new Date(),
       key: "selection",
     },
@@ -67,12 +62,15 @@ const OrderList = () => {
         }
       )
       .then((res) => {
+        console.log(res.data);
         setOrderList(res.data.result);
         setLimit(res.data.limit);
         setCountResult(res.data.allResult.length);
       })
       .catch((err) => {
         console.log(err);
+        setOrderList([]);
+        setCountResult(0);
       });
   }, [
     sortDateNewest,
@@ -118,13 +116,13 @@ const OrderList = () => {
           >
             <option value="">Semua Status</option>
             <option value="Menunggu Pembayaran">Menunggu Pembayaran</option>
-            <option value="Menunggu Konfirmasi Pembayaran">
+            <option value="Menunggu Konfirmasi">
               Menunggu Konfirmasi Pembayaran
             </option>
             <option value="Diproses">Diproses</option>
             <option value="Dikirim">Dikirim</option>
-            <option value="Pesanan Dikonfirmasi">Pesanan Dikonfirmasi</option>
             <option value="Dibatalkan">Dibatalkan</option>
+            <option value="Selesai">Selesai</option>
           </select>
           <div
             className={
@@ -203,7 +201,7 @@ const OrderList = () => {
                 ranges={dateRange}
                 months={2}
                 direction="horizontal"
-                className="absolute w-[100%] border shadow-md"
+                className="absolute w-[100%] border shadow-md z-10"
                 maxDate={new Date()}
               />
             )}
@@ -243,6 +241,9 @@ const OrderList = () => {
                 </div>
               </div>
               <div className="h-[1px] bg-slate-200 w-[95%] mt-1 ml-3"></div>
+              <div className="text-base font-bold px-3 pt-2">
+                {val.branch_name}
+              </div>
               <div className="flex flex-row px-3 items-center">
                 <img
                   src="https://www.freeiconspng.com/thumbs/no-image-icon/no-image-icon-6.png"
@@ -258,7 +259,7 @@ const OrderList = () => {
                   </span>
                 </div>
               </div>
-              {val.total_items === 0 ? null : (
+              {val.total_items === 1 ? null : (
                 <div className="px-3 text-slate-400 text-xs font-semibold mt-1">
                   +{val.total_items - 1} produk lainnya
                 </div>
@@ -272,33 +273,21 @@ const OrderList = () => {
             </div>
           );
         })}
-        <div className="self-center mt-8 mb-10 flex flex-row items-center">
-          <MdKeyboardDoubleArrowLeft
-            size={25}
-            className="mr-1 cursor-pointer"
-            onClick={() => setPage(1)}
-          />
-          <MdKeyboardArrowLeft
-            size={25}
-            className="mr-3 cursor-pointer"
-            onClick={() => page > 1 && setPage(page - 1)}
-          />
-          <span className="mb-[1px]">
-            Page {page} of {countResult && Math.ceil(countResult / limit)}
-          </span>
-          <MdKeyboardArrowRight
-            size={25}
-            className="ml-3 cursor-pointer"
-            onClick={() =>
-              page < Math.ceil(countResult / limit) && setPage(page + 1)
-            }
-          />
-          <MdKeyboardDoubleArrowRight
-            size={25}
-            className="ml-1 cursor-pointer"
-            onClick={() => setPage(Math.ceil(countResult / limit))}
+        {/* Pagination */}
+        <div className="self-center relative bottom-0 mt-8 mb-10 ">
+          <Pagination
+            currentPage={page}
+            totalCount={countResult}
+            pageSize={limit}
+            onPageChange={(page) => setPage(page)}
           />
         </div>
+        {/* If order not found */}
+        {!orderList.length && (
+          <div className="absolute top-[40%] left-[46%] text-red-500">
+            Order not found
+          </div>
+        )}
       </div>
     </Page>
   );

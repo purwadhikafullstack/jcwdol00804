@@ -2,20 +2,18 @@ import axios from "axios";
 import { API_URL } from "../../../../helper";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import toast, { Toaster } from "react-hot-toast";
 
 const FormSection = () => {
   const navigate = useNavigate();
-  // Data to API
-  const [address, setAddress] = useState("");
   const [province, setProvince] = useState("");
   const [city, setCity] = useState("");
+  const [address, setAddress] = useState("");
   const [zipcode, setZipcode] = useState("");
-
-  // Data to Select Cities by Province
   const [provinceData, setProvinceData] = useState([]);
   const [citiesData, setCitiesData] = useState([]);
+  const [isSubmit, setIsSubmit] = useState(false);
 
-  // Configure ^
   const getProvince = async () => {
     try {
       const result = await axios.get(`${API_URL}/cities-data/get-province`);
@@ -35,7 +33,6 @@ const FormSection = () => {
     }
   };
 
-  // Send Datas to API
   const onSubmit = async () => {
     try {
       const token = localStorage.getItem("xmart_login");
@@ -53,10 +50,10 @@ const FormSection = () => {
           },
         }
       );
-      alert(result.data.message);
-      navigate("/my-address");
+      toast.success(result.data.message);
+      setIsSubmit(true);
     } catch (error) {
-      alert(error.response.data.message);
+      toast.error(error.response.data.message);
     }
   };
 
@@ -66,8 +63,10 @@ const FormSection = () => {
 
   return (
     <div className="flex flex-col justify-center mx-20 my-10">
-      <div className="text-xl font-bold">Add Address</div>
-      <div className="w-full mt-5">
+      <Toaster />
+      <div className="text-xl font-bold mb-2">Add address</div>
+      <div className="h-[2px] bg-slate-200 w-[100%]"></div>
+      <div className="w-full mt-2">
         {/* Province */}
         <div className="">
           <label htmlFor="province" className="text-base font-semibold">
@@ -123,6 +122,7 @@ const FormSection = () => {
             id="address"
             name="address"
             type="text"
+            placeholder="Address detail..."
             onChange={(e) => setAddress(e.target.value)}
           />
         </div>
@@ -132,10 +132,11 @@ const FormSection = () => {
             Zip Code
           </label>
           <input
-            className="block border-[#82CD47] border rounded-md w-full h-[35px] px-[12px] my-2"
+            className="block border-[#82CD47] border rounded-md w-full h-[35px] px-[13px] my-2"
             id="zipcode"
             name="zipcode"
             type="text"
+            placeholder="Zipcode..."
             onChange={(e) => {
               setZipcode(e.target.value);
             }}
@@ -143,13 +144,22 @@ const FormSection = () => {
         </div>
         {/* Button Add */}
         <div className="flex justify-center">
-          <button
-            type="submit"
-            className="rounded-full bg-[#82CD47] w-8/12 h-[38px] text-white text-[22px] font-[600] leading-6 shadow-md disabled:opacity-50 my-5"
-            onClick={onSubmit}
-          >
-            Add
-          </button>
+          {!isSubmit ? (
+            <button
+              type="submit"
+              className="rounded-full bg-[#82CD47] w-8/12 h-[38px] text-white mt-6 text-[22px] font-[600] leading-6 shadow-md my-10 hover:opacity-75"
+              onClick={onSubmit}
+            >
+              Submit
+            </button>
+          ) : (
+            <button
+              className="rounded-full bg-[#82CD47] w-8/12 h-[38px] text-white mt-6 text-[22px] font-[600] leading-6 shadow-md my-10 hover:opacity-75"
+              onClick={() => navigate("/my-address")}
+            >
+              Back
+            </button>
+          )}
         </div>
       </div>
     </div>

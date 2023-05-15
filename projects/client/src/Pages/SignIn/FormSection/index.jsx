@@ -34,7 +34,11 @@ const FormSection = () => {
         const result = await axios.post(`${API_URL}/user/sign-in`, values);
         dispatch(loginAction(result.data));
         localStorage.setItem("xmart_login", result.data.token);
-        navigate("/", { replace: true });
+        if (result.data.role_id === 1) {
+          navigate("/", { replace: true });
+        } else {
+          navigate("/admin", { replace: true });
+        }
       } catch (error) {
         console.log(error);
         toast.error(error.response.data.message);

@@ -3,11 +3,12 @@ import * as Yup from "yup";
 import axios from "axios";
 import { API_URL } from "../../../helper";
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 const FormSection = () => {
-
   const [isSubmitting, setisSubmitting] = useState(false);
-
+  const navigate = useNavigate();
+  
   const formik = useFormik({
     initialValues: {
       email: "",
@@ -21,6 +22,7 @@ const FormSection = () => {
         const result = await axios.post(`${API_URL}/user/forgot-password`, values);
         setisSubmitting(false);
         alert(result.data.message);
+        navigate("/sign-in");
         formik.resetForm();
       } catch (error) {
         alert(error.response.data.message);

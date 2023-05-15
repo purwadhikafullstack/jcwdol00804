@@ -10,9 +10,10 @@ import { useSelector } from "react-redux";
 
 const DetailSection = () => {
   const { id } = useParams();
-  const { isLogged } = useSelector((state) => {
+  const { isLogged, is_verified } = useSelector((state) => {
     return {
       isLogged: state.userReducer.id,
+      is_verified: state.userReducer.is_verified,
     };
   });
 
@@ -50,28 +51,32 @@ const DetailSection = () => {
 
   const handleAddToCart = () => {
     const token = localStorage.getItem("xmart_login");
-    axios
-      .post(
-        `${API_URL}/cart/add-to-cart`,
-        {
-          quantity,
-          product_id: id,
-          branch_name: detail.branch_id,
-        },
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
+    if (!is_verified) {
+      toast.error("Please verify your account first");
+    } else {
+      axios
+        .post(
+          `${API_URL}/cart/add-to-cart`,
+          {
+            quantity,
+            product_id: id,
+            branch_name: detail.branch_id,
           },
-        }
-      )
-      .then((res) => {
-        if (res.status === 202) {
-          setIsModal(!isModal);
-        } else {
-          toast.success(res.data.message);
-        }
-      })
-      .catch((err) => console.log(err));
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        )
+        .then((res) => {
+          if (res.status === 202) {
+            setIsModal(!isModal);
+          } else {
+            toast.success(res.data.message);
+          }
+        })
+        .catch((err) => console.log(err));
+    }
   };
 
   const handleRemoveCartItem = () => {
@@ -158,12 +163,18 @@ const DetailSection = () => {
       <div className="flex justify-between">
         <div className="text-3xl font-bold text-gray-900">{detail.name}</div>
         <div className="flex items-center pt-2">
-          <button onClick={onMinus}>
-            <AiFillMinusCircle size={25} color="#82CD47" />
+          <button
+            onClick={onMinus}
+            className="text-[#82CD47] hover:text-[#BFF099]"
+          >
+            <AiFillMinusCircle size={25} />
           </button>
           <div className="font-semibold text-xl mx-5">{quantity}</div>
-          <button onClick={onPlus}>
-            <AiFillPlusCircle size={25} color="#82CD47" />
+          <button
+            onClick={onPlus}
+            className="text-[#82CD47] hover:text-[#BFF099]"
+          >
+            <AiFillPlusCircle size={25} />
           </button>
         </div>
       </div>
@@ -181,28 +192,18 @@ const DetailSection = () => {
       <div className="font-semibold my-2">Descriptions</div>
       <div className="text-gray-400 text-justify">{detail.description}</div>
       {/* Button */}
-      <div className="flex justify-between my-10">
+      <div className="flex justify-center my-10">
         <button
           className={
             isLogged
-              ? "flex justify-around items-center rounded-md bg-white w-44 h-8 text-[#86C649] text-[22px] font-[600] shadow-md px-2 hover:bg-[#82CD47] hover:text-white"
-              : "flex justify-around items-center rounded-md bg-[#82cd47] w-44 h-8 text-white text-[22px] font-[600] shadow-md px-2 cursor-not-allowed"
+              ? "flex justify-around items-center rounded-md bg-white w-44 h-8 text-[#86C649] text-[22px] font-[600] shadow-md px-2 hover:bg-[#82CD47] hover:text-white cursor-pointer"
+              : "flex justify-around items-center rounded-md bg-gray-200 w-44 h-8 text-gray-400 text-[22px] font-[600] shadow-md px-2 "
           }
           disabled={!isLogged}
           onClick={handleAddToCart}
         >
           <BiCartAlt size={25} />
           Add to Cart
-        </button>
-        <button
-          className={
-            isLogged
-              ? "flex ml-2 justify-around items-center rounded-md bg-white w-44 h-8 text-[#86C649] text-[22px] font-[600] shadow-md px-2 hover:bg-[#82CD47] hover:text-white"
-              : "flex ml-2 justify-around items-center rounded-md bg-[#82cd47] w-44 h-8 text-white text-[22px] font-[600] shadow-md px-2 cursor-not-allowed"
-          }
-          disabled={!isLogged}
-        >
-          Buy Now
         </button>
       </div>
     </div>

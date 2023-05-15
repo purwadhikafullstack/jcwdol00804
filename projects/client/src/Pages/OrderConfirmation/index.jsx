@@ -99,9 +99,9 @@ const OrderConfirmation = () => {
         }
       );
       Promise.all([promise1, promise2, promise3])
-        .then(() => {
+        .then((res) => {
           setisSubmitting(false);
-          navigate("/payment", { replace: true });
+          navigate(`/order-detail/${res[2].data.data}`, { replace: true });
         })
         .catch((err) => console.log(err));
     } else {
@@ -249,9 +249,8 @@ const OrderConfirmation = () => {
               <div className="flex flex-row justify-between px-5 mt-2">
                 <span>
                   Total Price{" "}
-                  {`(${location.state.items.length} ${
-                    location.state.items.length > 1 ? "items" : "item"
-                  })`}
+                  {`(${location.state.items.length} ${location.state.items.length > 1 ? "items" : "item"
+                    })`}
                 </span>
                 <span>Rp {location.state.totalPrice.toLocaleString("id")}</span>
               </div>

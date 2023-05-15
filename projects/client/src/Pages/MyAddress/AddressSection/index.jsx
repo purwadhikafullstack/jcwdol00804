@@ -2,12 +2,11 @@ import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import axios from "axios";
 import { API_URL } from "../../../helper";
+import toast, { Toaster } from "react-hot-toast";
 
 const AddressSection = () => {
-  // Fetching Data from API
   const [address, setAddress] = useState([]);
 
-  // Get Data from API
   const getData = async () => {
     try {
       const token = localStorage.getItem("xmart_login");
@@ -26,7 +25,6 @@ const AddressSection = () => {
     getData();
   }, []);
 
-  // Soft Delete an Address
   const deleteAddress = async (id) => {
     try {
       const result = await axios.put(`${API_URL}/address/delete/${id}`);
@@ -42,14 +40,13 @@ const AddressSection = () => {
           }
         });
       });
-      alert(result.data.message);
+      toast.success(result.data.message);
       await getData();
     } catch (error) {
-      alert(error.response.data.message);
+      toast.error(error.response.data.message);
     }
   };
 
-  // Set an Address to Main Address
   const setMainAddress = async (id) => {
     try {
       const token = localStorage.getItem("xmart_login");
@@ -74,33 +71,38 @@ const AddressSection = () => {
           }
         });
       });
-      alert(result.data.message);
+      toast.success(result.data.message);
       await getData();
     } catch (error) {
-      alert(error.response.data.message);
+      toast.error(error.response.data.message);
     }
   };
 
   return (
     <div className="flex flex-col justify-center mx-20 my-10">
-      <div className="text-xl font-bold">My Addresses</div>
+      <Toaster />
+      <div className="flex justify-between mb-2">
+        <p className="text-xl font-bold">My addresses</p>
+        <Link to="/add-address">
+          <button className="rounded-lg bg-blue-400 text-white text-base font-[600] shadow-md mt-1 px-2 hover:opacity-75">
+            + Add address
+          </button>
+        </Link>
+      </div>
+      <div className="h-[2px] bg-slate-200 w-[100%]"></div>
       {address.length > 0 ? (
-        // Conditions if address is not empty
         <div className="flex flex-col justify-center">
-          {/* Fetching Data */}
           {address.map((address) => (
             <div
               key={address.id}
-              className="block border rounded-md w-full bg-gray-100 p-3 mt-5 shadow"
+              className="block border rounded-md w-full bg-gray-100 p-3 mt-2 shadow"
             >
               <div className="font-semibold">{address.address}</div>
               <div>
                 {address.city}, {address.province} {address.zipcode}
               </div>
               <div className="flex justify-between pt-6">
-                {/* Main Address Button */}
                 {address.is_main === 1 ? (
-                  // Conditions the button if address is_main
                   <button
                     className="rounded-md bg-[#47B4CD] h-7 px-2 text-xs text-white font-semibold shadow-md"
                     disabled="disabled"
@@ -108,27 +110,32 @@ const AddressSection = () => {
                     Your Main Address
                   </button>
                 ) : (
-                  // Conditions the button if address not is_main
                   <button
                     onClick={() => setMainAddress(address.id)}
-                    className="rounded-md bg-[#82CD47] h-7 px-2 text-xs text-white font-semibold shadow-md"
+                    className="rounded-md bg-[#82CD47] h-7 px-2 text-xs text-white font-semibold shadow-md hover:opacity-75"
                   >
                     Set Main Address
                   </button>
                 )}
-                {/* Delete Address Button */}
-                <button
-                  onClick={() => deleteAddress(address.id)}
-                  className="rounded-md bg-[#CC4158] w-[60px] h-7 px-2 text-xs text-white font-semibold shadow-md"
-                >
-                  Delete
-                </button>
+                <div className="flex justify-right">
+                  <Link
+                    to={`/edit-address/${address.id}`}
+                    className="text-center rounded-md bg-[#3285a8] h-7 w-16 px-2 pt-[6px] mr-2 text-xs text-white font-semibold shadow-md hover:opacity-75"
+                  >
+                    Edit
+                  </Link>
+                  <button
+                    className="rounded-md bg-[#CC4158] w-[60px] h-7 px-2 text-xs text-white font-semibold shadow-md hover:opacity-75"
+                    onClick={() => deleteAddress(address.id)}
+                  >
+                    Delete
+                  </button>
+                </div>
               </div>
             </div>
           ))}
         </div>
       ) : (
-        // Conditions if address is empty
         <div className="flex flex-col justify-center text-center border rounded-md w-full bg-gray-100 p-3 mt-5 rounded shadow">
           <div className="text-lg font-bold">You have no address</div>
           <div className="text-base font-semibold">
@@ -136,14 +143,6 @@ const AddressSection = () => {
           </div>
         </div>
       )}
-      {/* Route to /add-address */}
-      <Link to="/add-address">
-        <div className="flex justify-center">
-          <button className="rounded-full bg-[#82CD47] w-8/12 h-[38px] text-white text-[22px] font-[600] shadow-md my-5">
-            Add Address
-          </button>
-        </div>
-      </Link>
     </div>
   );
 };

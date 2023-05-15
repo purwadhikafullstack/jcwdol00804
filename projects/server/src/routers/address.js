@@ -11,5 +11,7 @@ route.get(
   readToken,
   addressController.getAvailableCourier
 );
+route.get("/my-address/:id", addressController.getDetailAddress);
+route.patch("/edit-address/:id", addressController.editDetailAddress);
 
 module.exports = route;

@@ -9,10 +9,12 @@ const FeaturedComponent = ({ branchName }) => {
 
   const getFeaturedProducts = async () => {
     try {
-      const { data } = await axios.get(
-        `${API_URL}/product/featured-products?branch_name=${branchName}`
-      );
-      setProducts(data.data);
+      if (branchName) {
+        const { data } = await axios.get(
+          `${API_URL}/product/featured-products?branch_name=${branchName}`
+        );
+        setProducts(data.data);
+      }
     } catch (error) {
       alert(error.response.data.message);
     }
@@ -30,7 +32,8 @@ const FeaturedComponent = ({ branchName }) => {
           <div className="flex flex-row flex-wrap justify-center">
             <div
               className="flex-col justify-center box-content rounded drop-shadow-md 
-                        h-44 w-32 bg-white text-xs m-2 "
+                        h-44 w-32 bg-white text-xs m-2
+                        hover:border border-[#86C649]"
             >
               <img className="h-20 w-20 mx-auto my-2" src={img} alt="img" />
               <div className="text-center text-xs text-[#86C649]">

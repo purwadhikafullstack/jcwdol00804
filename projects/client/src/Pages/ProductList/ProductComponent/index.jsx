@@ -9,78 +9,111 @@ import {
   TbSortDescendingNumbers,
   TbSortAscendingNumbers,
 } from "react-icons/tb";
-import { BiSearch } from "react-icons/bi";
 import img from "../../../Assets/default.png";
 import { Link, useLocation } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
-import { changeStoreAction } from "../../../Actions/store";
+import { changeStoreAction, setDefaultStore } from "../../../Actions/store";
 import toast, { Toaster } from "react-hot-toast";
+import notFound from "../../../Assets/not-found.png";
+import Pagination from "../../../Components/Pagination";
 
 const ProductComponent = () => {
   const location = useLocation();
   const dispatch = useDispatch();
+  const { branchName, isLogged, is_verified } = useSelector((state) => {
+    return {
+      branchName: state.storeReducer.defaultStore,
+      isLogged: state.userReducer.id,
+      is_verified: state.userReducer.is_verified,
+    };
+  });
   const [products, setProducts] = useState([]);
   const [categoryList, setCategoryList] = useState([]);
   const [category, setCategory] = useState(
     location.state ? location.state.from : ""
   );
   const [name, setName] = useState("");
-  const [nameValue, setNameValue] = useState("");
-  const { branchName, isLogged } = useSelector((state) => {
-    return {
-      branchName: state.storeReducer.defaultStore,
-      isLogged: state.userReducer.id,
-    };
-  });
   const [by, setBy] = useState("name");
   const [order, setOrder] = useState("asc");
   const [page, setPage] = useState(1);
-  const limit = 10;
+  const [limit, setLimit] = useState(1);
+  const [countResult, setCountResult] = useState(0);
   const [isModal, setIsModal] = useState(false);
   const [modalProductId, setModalProductId] = useState();
   const [branchList, setBranchList] = useState([]);
 
   const getProducts = async () => {
     try {
-      const { data } = await axios.get(
-        `${API_URL}/product/product-list?category=${category}&name=${name}&by=${by}&order=${order}&limit=${limit}&page=${page}&branch_name=${branchName}`
-      );
-      setProducts(data.data);
+      if (!branchName) {
+        const selectedBranch = sessionStorage.getItem("branchName");
+        const { data } = await axios.get(
+          `${API_URL}/product/product-list?category=${category}&name=${name}&by=${by}&order=${order}&page=${page}&branch_name=${selectedBranch}`
+        );
+        setProducts(data.data);
+        setCountResult(data.allResultLength);
+        setLimit(data.limit);
+      } else {
+        const { data } = await axios.get(
+          `${API_URL}/product/product-list?category=${category}&name=${name}&by=${by}&order=${order}&page=${page}&branch_name=${branchName}`
+        );
+        setProducts(data.data);
+        setCountResult(data.allResultLength);
+        setLimit(data.limit);
+      }
     } catch (error) {
-      alert(error.response.data.message);
+      setProducts([]);
+      setCountResult(0);
     }
   };
 
   const fetchCategories = async () => {
     try {
-      const { data } = await axios.get(`${API_URL}/product/categories`);
+      const { data } = await axios.get(
+        `${API_URL}/category/categories?branch_name=${branchName}`
+      );
       setCategoryList(data.data);
     } catch (error) {
-      alert(error.response.data.message);
+      setCategoryList([]);
     }
   };
 
   useEffect(() => {
-    getProducts();
     axios.get(`${API_URL}/product/get-branch-list`).then((res) => {
       setBranchList(res.data);
     });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [category, name, by, order, limit, page, branchName]);
-
-  useEffect(() => {
     fetchCategories();
+    getProducts();
+    if (!branchName) {
+      const selectedBranch = sessionStorage.getItem("branchName");
+      if (selectedBranch) {
+        dispatch(changeStoreAction({ defaultStore: selectedBranch }));
+      } else {
+        // If no branchName is selected, set the default store
+        dispatch(setDefaultStore());
+      }
+    } else {
+      // If branchName is set in the state, store it in session storage
+      sessionStorage.setItem("branchName", branchName);
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [category, name, by, order, limit, page, branchName, dispatch]);
 
   const handleSortByName = () => {
-    setOrder(order === "asc" ? "desc" : "asc");
-    setBy("name");
+    if (by === "name") {
+      setOrder(order === "asc" ? "desc" : "asc");
+    } else {
+      setBy("name");
+      setOrder("asc");
+    }
   };
 
   const handleSortByPrice = () => {
-    setOrder(order === "asc" ? "desc" : "asc");
-    setBy("price");
+    if (by === "price") {
+      setOrder(order === "asc" ? "desc" : "asc");
+    } else {
+      setBy("price");
+      setOrder("asc");
+    }
   };
 
   const handleCategoryChange = (e) => {
@@ -93,41 +126,36 @@ const ProductComponent = () => {
     setPage(1);
   };
 
-  // Pagination
-  const handleNextPage = () => {
-    setPage(page + 1);
-  };
-
-  const handlePrevPage = () => {
-    setPage(page - 1);
-  };
-
   // Add to cart
   const handleAddToCart = (product_id, branch_name) => {
     const token = localStorage.getItem("xmart_login");
-    axios
-      .post(
-        `${API_URL}/cart/add-to-cart`,
-        {
-          quantity: 1,
-          product_id,
-          branch_name,
-        },
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
+    if (!is_verified) {
+      toast.error("Please verify your account first");
+    } else {
+      axios
+        .post(
+          `${API_URL}/cart/add-to-cart`,
+          {
+            quantity: 1,
+            product_id,
+            branch_name,
           },
-        }
-      )
-      .then((res) => {
-        if (res.status === 202) {
-          setIsModal(!isModal);
-          setModalProductId(product_id);
-        } else {
-          toast.success(res.data.message);
-        }
-      })
-      .catch((err) => console.log(err));
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        )
+        .then((res) => {
+          if (res.status === 202) {
+            setIsModal(!isModal);
+            setModalProductId(product_id);
+          } else {
+            toast.success(res.data.message);
+          }
+        })
+        .catch((err) => console.log(err));
+    }
   };
 
   const handleRemoveCartItem = (product_id) => {
@@ -210,8 +238,8 @@ const ProductComponent = () => {
       <div className="px-5 flex flex-row items-center mb-3">
         <FcShop size={20} />
         <select
-          className="bg-[#6CC51D] font-semibold text-white rounded-full px-3 ml-1"
-          defaultValue={branchName}
+          className="bg-[#6CC51D] font-semibold text-white rounded-full px-3 ml-1 cursor-pointer"
+          value={branchName}
           onChange={(e) =>
             dispatch(changeStoreAction({ defaultStore: e.target.value }))
           }
@@ -233,113 +261,108 @@ const ProductComponent = () => {
             placeholder="Search name.."
             type="text"
             onChange={(e) => {
-              setNameValue(e.target.value);
+              setName(e.target.value);
             }}
           />
-          <button
-            className="text-[gray] hover:text-[#82CD47]"
-            onClick={() => {
-              setName(nameValue);
-            }}
-          >
-            <BiSearch size={20} />
-          </button>
         </div>
         {/* Sorting */}
-        <div className="flex justify-center mt-2 mb-5">
+        <div className="flex justify-between mt-2 mb-5">
           <select
-            className="bg-gray-100 rounded w-full text-sm text-gray-400 h-8 px-2 focus:outline-none"
+            className="bg-gray-100 rounded w-40 text-sm text-gray-400 h-8 px-2 focus:outline-none"
             value={category}
             onChange={handleCategoryChange}
           >
             <option value="Select category">Select category</option>
             {categoryList.map((category) => {
               return (
-                <option key={category.category_id} value={category.category_id}>
-                  {category.category_id}
+                <option key={category.id} value={category.name}>
+                  {category.name}
                 </option>
               );
             })}
           </select>
           {/* Button ASC/DESC by name */}
           <button
-            className="text-[gray] hover:text-[#82CD47] mx-2"
-            onClick={() => handleSortByName("name")}
+            className="flex bg-white rounded-md shadow-md text-sm text-[gray] hover:text-[#82CD47] my-[2px] p-1"
+            onClick={handleSortByName}
           >
-            {order === "asc" ? (
-              <TbSortAscendingLetters size={30} />
-            ) : (
-              <TbSortDescendingLetters size={30} />
+            Sort by name
+            {by === "name" && order === "asc" && (
+              <TbSortAscendingLetters size={16} className="mt-1 ml-1" />
+            )}
+            {by === "name" && order === "desc" && (
+              <TbSortDescendingLetters size={16} className="mt-1 ml-1" />
             )}
           </button>
           {/* Button ASC/DESC by price */}
           <button
-            className="text-[gray] hover:text-[#82CD47]"
-            onClick={() => handleSortByPrice("price")}
+            className="flex bg-white rounded-md shadow-md text-sm text-[gray] hover:text-[#82CD47] my-[2px] p-1"
+            onClick={handleSortByPrice}
           >
-            {order === "asc" ? (
-              <TbSortAscendingNumbers size={30} />
-            ) : (
-              <TbSortDescendingNumbers size={30} />
+            Sort by price
+            {by === "price" && order === "asc" && (
+              <TbSortAscendingNumbers size={16} className="mt-1 ml-1" />
+            )}
+            {by === "price" && order === "desc" && (
+              <TbSortDescendingNumbers size={16} className="mt-1 ml-1" />
             )}
           </button>
         </div>
       </div>
       {/* Products Result */}
-      <div className="flex flex-row flex-wrap justify-center">
-        {products.map((product) => (
-          <div key={product.id}>
-            <div
-              className="flex-col justify-center box-content 
+      {products.length === 0 ? (
+        <div className="flex flex-row flex-wrap justify-center">
+          <img className="w-40 h-40" src={notFound} alt="not-found" />
+        </div>
+      ) : (
+        <div className="flex flex-row flex-wrap justify-center">
+          {products.map((product) => (
+            <div key={product.id}>
+              <div
+                className="flex-col justify-center box-content 
                             rounded-lg drop-shadow-md h-42 w-32 bg-white
-                            text-xs mx-5 my-2 pt-2 address"
-            >
-              <Link to={`/product-detail/${product.id}`}>
-                <img className="h-20 w-20 mx-auto mt-1" src={img} alt="img" />
-                <div className="text-center text-sm font-medium product-name h-10">
-                  {product.name}
-                </div>
-                <div
-                  className="text-center text-sm text-[#86C649] 
+                            text-xs mx-5 my-2 pt-2
+                            hover:border border-[#86C649]"
+              >
+                <Link to={`/product-detail/${product.id}`}>
+                  <img className="h-20 w-20 mx-auto mt-1" src={img} alt="img" />
+                  <div className="text-center text-sm font-medium product-name h-10">
+                    {product.name}
+                  </div>
+                  <div
+                    className="text-center text-sm text-[#86C649] 
                             font-semibold my-1"
-                >
-                  Rp. {product.price.toLocaleString()},-
+                  >
+                    Rp. {product.price.toLocaleString()},-
+                  </div>
+                </Link>
+                {/* Button Add to cart */}
+                <div className="flex justify-end">
+                  <button
+                    className={
+                      isLogged
+                        ? "text-[#82CD47] hover:text-[#BFF099]"
+                        : "text-gray-200"
+                    }
+                    onClick={() => handleAddToCart(product.id, product.branch_id)}
+                    disabled={!isLogged}
+                  >
+                    <AiFillPlusCircle size={30} />
+                  </button>
                 </div>
-              </Link>
-              {/* Button Add to cart */}
-              <div className="flex justify-end">
-                <button
-                  className={
-                    isLogged
-                      ? "text-[#82CD47] hover:text-[#BFF099]"
-                      : "text-[#82cd47] cursor-not-allowed"
-                  }
-                  onClick={() => handleAddToCart(product.id, product.branch_id)}
-                  disabled={!isLogged}
-                >
-                  <AiFillPlusCircle size={30} />
-                </button>
               </div>
             </div>
-          </div>
-        ))}
-      </div>
+          ))}
+        </div>
+      )}
       {/* Pagination */}
-      <div
-        className="flex justify-between my-5 bg-[#AAD27D] 
-                text-white font-semibold rounded-md drop-shadow-md mx-24"
-      >
-        <button className="mx-2" onClick={handlePrevPage} disabled={page <= 1}>
-          Prev
-        </button>
-        <div className="mx-2">Page {page}</div>
-        <button
-          className="mx-2"
-          onClick={handleNextPage}
-          disabled={products.length < limit}
-        >
-          Next
-        </button>
+      <div className="flex justify-center my-10 font-semibold">
+        <Pagination
+          currentPage={page}
+          totalCount={countResult}
+          pageSize={limit}
+          onPageChange={(page) => setPage(page)}
+        />
       </div>
     </div>
   );
