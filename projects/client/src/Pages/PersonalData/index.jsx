@@ -74,8 +74,8 @@ const PersonalData = () => {
         .test("fileType", "Unsupported file type", (value) =>
           value
             ? ["image/png", "image/jpeg", "image/jpg", "image/gif"].includes(
-              value.type
-            )
+                value.type
+              )
             : true
         )
         .nullable(),
@@ -163,8 +163,8 @@ const PersonalData = () => {
                   ? URL.createObjectURL(formik.values.images)
                   : `http://localhost:8000/${profile_img}`
                 : !formik.errors.images && formik.values.images
-                  ? URL.createObjectURL(formik.values.images)
-                  : ""
+                ? URL.createObjectURL(formik.values.images)
+                : ""
             }
             borderRadius="50%"
             w="100px"
@@ -364,7 +364,15 @@ const PersonalData = () => {
                         Discard
                       </div>
                       <button
-                        className="px-4 py-2 text-white bg-[#82CD47] rounded"
+                        className={
+                          formik.errors.images ||
+                          formik.errors.name ||
+                          formik.errors.email ||
+                          formik.errors.birthdate ||
+                          formik.errors.gender
+                            ? `px-4 py-2 bg-gray-300 text-gray-500 rounded cursor-default`
+                            : `px-4 py-2 text-white bg-[#82CD47] rounded`
+                        }
                         type="submit"
                       >
                         Confirm Changes

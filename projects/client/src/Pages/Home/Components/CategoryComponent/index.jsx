@@ -38,13 +38,13 @@ const CategoryComponent = ({ branchName }) => {
             <div className="box-content rounded h-16 w-16 bg-white text-xs text-center mx-2 mt-2 mb-10">
               {category.category_img === null ? (
                 <img
-                  className="rounded-md h-15 w-15 mx-auto my-2"
+                  className="rounded-md h-16 w-16 mx-auto my-2"
                   src={img}
                   alt="default"
                 />
               ) : (
                 <img
-                  className="rounded-md h-15 w-15 mx-auto my-2"
+                  className="rounded-md h-16 w-16 mx-auto my-2"
                   src={
                     category.category_img &&
                     `http://localhost:8000/${category.category_img}`

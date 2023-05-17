@@ -184,7 +184,7 @@ const DetailSection = () => {
       <div className="flex my-2">
         <div className="flex">
           <div className="text-2xl text-[#86C649] font-semibold">
-            Rp. {detail.price?.toLocaleString()},-
+            Rp. {detail.price?.toLocaleString("id")},-
           </div>
         </div>
       </div>
