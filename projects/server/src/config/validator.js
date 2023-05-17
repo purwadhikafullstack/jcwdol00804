@@ -285,12 +285,8 @@ module.exports = {
   },
   validateAddOrEditProduct: async (req, res, next) => {
     try {
-      const categoryList = await dbQuery(`SELECT c.name AS category_name
-      FROM product p
-      JOIN branch b ON p.branch_id= b.id
-      JOIN category c ON p.category_id = c.id
-      WHERE p.is_delete=0 AND b.name='${req.decript.branch_name}'
-      GROUP BY c.name`);
+      const categoryList = await dbQuery(`SELECT name AS category_name
+      FROM category WHERE is_delete=0 AND branch_id=${req.decript.branch_id}`);
       await check("category")
         .isIn(categoryList.map((val) => val.category_name))
         .notEmpty()

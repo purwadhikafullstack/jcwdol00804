@@ -41,7 +41,7 @@ module.exports = {
             FROM product p
             JOIN branch b ON p.branch_id = b.id
             JOIN category c ON p.category_id = c.id
-            WHERE p.is_delete=0 
+            WHERE p.is_delete=0 AND p.stock > 0
             AND b.name LIKE '${branch_name}'
             AND c.name LIKE '%${category}%'
             AND p.name LIKE '%${name}%'
@@ -168,11 +168,13 @@ module.exports = {
     const { search, page, sort_by, order } = req.query;
     const limit = 8;
     const offset = (page - 1) * limit;
-    const query = `SELECT p.id, p.name, p.description, p.price, p.stock, p.weight, p.is_featured ,p.is_delete, p.product_img, c.name AS category_name FROM product p JOIN branch b ON p.branch_id = b.id JOIN category c ON p.category_id = c.id WHERE p.is_delete=0 AND b.name='${req.decript.branch_name
-      }' AND (c.name LIKE '%${search}%' OR p.name LIKE '%${search}%') ${sort_by === ""
+    const query = `SELECT p.id, p.name, p.description, p.price, p.stock, p.weight, p.is_featured ,p.is_delete, p.product_img, c.name AS category_name FROM product p JOIN branch b ON p.branch_id = b.id JOIN category c ON p.category_id = c.id WHERE p.is_delete=0 AND b.name='${
+      req.decript.branch_name
+    }' AND (c.name LIKE '%${search}%' OR p.name LIKE '%${search}%') ${
+      sort_by === ""
         ? ""
         : `ORDER BY p.${sort_by} ${order === "true" ? "ASC" : "DESC"}`
-      } `;
+    } `;
     const pagination = `LIMIT ${limit} OFFSET ${offset}`;
     db.query(query + " " + pagination, (error, results) => {
       if (error) {
@@ -220,7 +222,9 @@ module.exports = {
     try {
       const { category, product_name, description, price, weight } = req.body;
       const categoryId = await dbQuery(
-        `SELECT id from category WHERE name=${db.escape(category)}`
+        `SELECT id from category WHERE name=${db.escape(
+          category
+        )} AND branch_id=${req.decript.branch_id}`
       );
       if (!categoryId.length) {
         return res.status(404).send({
@@ -481,7 +485,9 @@ module.exports = {
           }
           return res.status(200).send({
             closestStore: results[0].name,
-            userLocation: geoResults.results[0].components.city || geoResults.results[0].components.city_district,
+            userLocation:
+              geoResults.results[0].components.city ||
+              geoResults.results[0].components.city_district,
           });
         }
       );

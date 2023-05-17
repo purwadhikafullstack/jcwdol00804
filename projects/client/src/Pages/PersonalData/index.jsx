@@ -161,7 +161,7 @@ const PersonalData = () => {
               profile_img
                 ? !formik.errors.images && formik.values.images
                   ? URL.createObjectURL(formik.values.images)
-                  : `http://localhost:8000/${profile_img}`
+                  : `https://jcwdol00804.purwadhikabootcamp.com/${profile_img}`
                 : !formik.errors.images && formik.values.images
                 ? URL.createObjectURL(formik.values.images)
                 : ""
@@ -174,7 +174,10 @@ const PersonalData = () => {
         ) : (
           // Untuk hasil
           <Avatar
-            src={profile_img && `http://localhost:8000/${profile_img}`}
+            src={
+              profile_img &&
+              `https://jcwdol00804.purwadhikabootcamp.com/${profile_img}`
+            }
             borderRadius="50%"
             w="100px"
             h="100px"

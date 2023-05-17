@@ -246,7 +246,7 @@ const OrderList = () => {
               </div>
               <div className="flex flex-row px-3 items-center">
                 <img
-                  src="https://www.freeiconspng.com/thumbs/no-image-icon/no-image-icon-6.png"
+                  src={`https://jcwdol00804.purwadhikabootcamp.com/${val.product_img}`}
                   alt=""
                   className=" w-12 h-12 mt-2 border text-xs"
                 />

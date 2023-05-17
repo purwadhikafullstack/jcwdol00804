@@ -8,6 +8,7 @@ import ModalCourier from "./ModalCourier";
 import axios from "axios";
 import { API_URL } from "../../helper";
 import toast, { Toaster } from "react-hot-toast";
+import { BsValentine2 } from "react-icons/bs";
 
 const OrderConfirmation = () => {
   const location = useLocation();
@@ -152,7 +153,7 @@ const OrderConfirmation = () => {
                 >
                   <div className="flex flex-row items-center mt-1 ">
                     <img
-                      src="https://www.freeiconspng.com/thumbs/no-image-icon/no-image-icon-6.png"
+                      src={`https://jcwdol00804.purwadhikabootcamp.com/${BsValentine2.product_img}`}
                       alt={val2.name}
                       className=" w-12 h-12 mt-2 border text-xs"
                     />
@@ -249,8 +250,9 @@ const OrderConfirmation = () => {
               <div className="flex flex-row justify-between px-5 mt-2">
                 <span>
                   Total Price{" "}
-                  {`(${location.state.items.length} ${location.state.items.length > 1 ? "items" : "item"
-                    })`}
+                  {`(${location.state.items.length} ${
+                    location.state.items.length > 1 ? "items" : "item"
+                  })`}
                 </span>
                 <span>Rp {location.state.totalPrice.toLocaleString("id")}</span>
               </div>
