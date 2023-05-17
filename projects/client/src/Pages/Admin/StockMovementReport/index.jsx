@@ -316,7 +316,8 @@ const StockMovementReport = () => {
                                 {val2.quantity_change}
                               </td>
                               <td className="px-6 py-2">
-                                {item.initial_stock + val2.quantity_change}
+                                {Number(item.initial_stock) +
+                                  Number(val2.quantity_change)}
                               </td>
                             </tr>
                           ))}

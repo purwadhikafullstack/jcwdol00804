@@ -333,7 +333,7 @@ const ProductComponent = () => {
                     className="text-center text-sm text-[#86C649] 
                             font-semibold my-1"
                   >
-                    Rp. {product.price.toLocaleString()},-
+                    Rp. {product.price.toLocaleString("id")},-
                   </div>
                 </Link>
                 {/* Button Add to cart */}
@@ -344,7 +344,9 @@ const ProductComponent = () => {
                         ? "text-[#82CD47] hover:text-[#BFF099]"
                         : "text-gray-200"
                     }
-                    onClick={() => handleAddToCart(product.id, product.branch_id)}
+                    onClick={() =>
+                      handleAddToCart(product.id, product.branch_id)
+                    }
                     disabled={!isLogged}
                   >
                     <AiFillPlusCircle size={30} />

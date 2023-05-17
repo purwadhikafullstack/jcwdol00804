@@ -267,7 +267,7 @@ const OrderList = () => {
               <div className="px-3 mt-1 text-center">
                 <span className="font-bold">Total Purchase : </span>
                 <span className="font-bold text-[#6CC51D]">
-                  Rp {val.total_purchased.toLocaleString("id")}
+                  Rp {Number(val.total_purchased).toLocaleString("id")}
                 </span>
               </div>
             </div>

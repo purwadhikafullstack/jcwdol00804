@@ -81,7 +81,7 @@ module.exports = {
               });
             }
             return res.status(200).send(
-              results2[0].other_product
+              Number(results2[0].other_product) > 0
                 ? [
                     ...results,
                     {
@@ -99,10 +99,11 @@ module.exports = {
   getSalesDataBranch: (req, res) => {
     let { branch_id, type } = req.query;
     if (type === "monthly") {
-      let sixMonths = (arr) => {
+      const manyMonth = 12;
+      let arrMonths = (arr) => {
         let result = [...arr];
-        if (arr.length < 12 && arr.length > 0) {
-          for (let i = 1; i <= 12 - arr.length; i++) {
+        if (arr.length < manyMonth && arr.length > 0) {
+          for (let i = 1; i <= manyMonth - arr.length; i++) {
             result.unshift({
               date: format(subMonths(new Date(arr[0].date), i), "MMM yyyy"),
               total_sales: 0,
@@ -112,7 +113,7 @@ module.exports = {
         return result;
       };
       db.query(
-        `SELECT DATE_FORMAT(b.updated_at, '%b %Y') AS date, SUM((c.price*a.quantity)) as total_sales FROM order_item a JOIN xmart.order b ON a.order_id = b.id JOIN product c ON a.product_id = c.id WHERE c.branch_id = ${branch_id} AND b.status IN ('Menunggu Pembayaran', 'Menunggu Konfirmasi', 'Dibatalkan') AND b.updated_at > DATE_SUB(now(),INTERVAL 12 MONTH) GROUP by date`,
+        `SELECT DATE_FORMAT(b.updated_at, '%b %Y') AS date, SUM((c.price*a.quantity)) as total_sales FROM order_item a JOIN xmart.order b ON a.order_id = b.id JOIN product c ON a.product_id = c.id WHERE c.branch_id = ${branch_id} AND b.status IN ('Menunggu Pembayaran', 'Menunggu Konfirmasi', 'Dibatalkan') AND b.updated_at > DATE_SUB(now(),INTERVAL ${manyMonth} MONTH) GROUP by date`,
         (err, results) => {
           if (err) {
             return res.status(500).send({
@@ -120,14 +121,15 @@ module.exports = {
               message: err,
             });
           }
-          return res.status(200).send(sixMonths(results));
+          return res.status(200).send(arrMonths(results));
         }
       );
     } else if (type === "yearly") {
-      let sixYears = (arr) => {
+      const manyYear = 6;
+      let arrYears = (arr) => {
         let result = [...arr];
-        if (arr.length < 10 && arr.length > 0) {
-          for (let i = 1; i <= 10 - arr.length; i++) {
+        if (arr.length < manyYear && arr.length > 0) {
+          for (let i = 1; i <= manyYear - arr.length; i++) {
             result.unshift({
               date: format(subYears(new Date(arr[0].date), i), "yyyy"),
               total_sales: 0,
@@ -137,7 +139,7 @@ module.exports = {
         return result;
       };
       db.query(
-        `SELECT DATE_FORMAT(b.updated_at, '%Y') AS date, SUM((c.price*a.quantity)) as total_sales FROM order_item a JOIN xmart.order b ON a.order_id = b.id JOIN product c ON a.product_id = c.id WHERE c.branch_id = ${branch_id} AND b.status IN ('Menunggu Pembayaran', 'Menunggu Konfirmasi', 'Dibatalkan') AND b.updated_at > DATE_SUB(now(),INTERVAL 10 YEAR) GROUP by date`,
+        `SELECT DATE_FORMAT(b.updated_at, '%Y') AS date, SUM((c.price*a.quantity)) as total_sales FROM order_item a JOIN xmart.order b ON a.order_id = b.id JOIN product c ON a.product_id = c.id WHERE c.branch_id = ${branch_id} AND b.status IN ('Menunggu Pembayaran', 'Menunggu Konfirmasi', 'Dibatalkan') AND b.updated_at > DATE_SUB(now(),INTERVAL ${manyYear} YEAR) GROUP by date`,
         (err, results) => {
           if (err) {
             return res.status(500).send({
@@ -145,7 +147,7 @@ module.exports = {
               message: err,
             });
           }
-          return res.status(200).send(sixYears(results));
+          return res.status(200).send(arrYears(results));
         }
       );
     }
