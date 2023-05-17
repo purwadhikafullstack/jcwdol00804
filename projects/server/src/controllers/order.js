@@ -1,37 +1,65 @@
 const { db, dbQuery } = require("../config/db");
 
 module.exports = {
-  createNewOrder: (req, res) => {
-    const { items, address_id, courier, shipping_cost } = req.body;
-    db.query(
-      `INSERT INTO xmart.order SET ?`,
-      { user_id: req.decript.id, address_id, courier, shipping_cost },
-      (err, result) => {
-        if (err) {
-          return res.status(500).send({
-            success: false,
-            message: "Failed inserting order",
-          });
-        }
-        db.query(
-          `INSERT INTO order_item (product_id, order_id, quantity) VALUES ?`,
-          [items.map((val) => [val.product_id, result.insertId, val.quantity])],
-          (err, result2) => {
-            if (err) {
-              return res.status(500).send({
-                success: false,
-                message: "Failed inserting order item",
-              });
-            }
-            return res.status(200).send({
-              success: true,
-              message: "Add order item success",
-              data: result.insertId,
+  createNewOrder: async (req, res) => {
+    try {
+      const { items, address_id, courier, shipping_cost } = req.body;
+      let invoice = "";
+      const lastId = await dbQuery(
+        `SELECT max(id) as last_id from JCWDOL00804.order`
+      );
+      if (!lastId.length) {
+        invoice = `INV/${format(new Date(), "yyyyMMdd")}/XM/000000001`;
+      } else {
+        invoice = `INV/${format(new Date(), "yyyyMMdd")}/XM/${String(
+          lastId[0].last_id + 1
+        ).padStart(9, "0")}`;
+      }
+      db.query(
+        `INSERT INTO JCWDOL00804.order SET ?`,
+        {
+          user_id: req.decript.id,
+          address_id,
+          courier,
+          shipping_cost,
+          invoice_no: invoice,
+        },
+        (err, result) => {
+          if (err) {
+            return res.status(500).send({
+              success: false,
+              message: "Failed inserting order",
             });
           }
-        );
-      }
-    );
+          db.query(
+            `INSERT INTO order_item (product_id, order_id, quantity) VALUES ?`,
+            [
+              items.map((val) => [
+                val.product_id,
+                result.insertId,
+                val.quantity,
+              ]),
+            ],
+            (err, result2) => {
+              if (err) {
+                return res.status(500).send({
+                  success: false,
+                  message: "Failed inserting order item",
+                });
+              }
+              return res.status(200).send({
+                success: true,
+                message: "Add order item success",
+                data: result.insertId,
+              });
+            }
+          );
+        }
+      );
+    } catch (error) {
+      console.log(error);
+      return res.status(500).send(error);
+    }
   },
   getOrderList: (req, response) => {
     const { inv, status, start_date, end_date, order, sort_by, page } =
@@ -44,7 +72,7 @@ module.exports = {
           const res = await dbQuery(
             `SELECT b.id, c.product_img, d.name AS branch_name, a.quantity, b.status, b.invoice_no, b.created_at, c.name, SUM(a.quantity * c. price) AS total_purchased, COUNT(a.id) AS total_items
             FROM order_item a
-            JOIN xmart.order b ON a.order_id = b.id
+            JOIN JCWDOL00804.order b ON a.order_id = b.id
             JOIN product c ON c.id = a.product_id
             JOIN branch d ON c.branch_id = d.id
             WHERE b.user_id = ${req.decript.id} 
@@ -75,7 +103,7 @@ module.exports = {
           const res = await dbQuery(
             `SELECT b.id, c.product_img, d.name AS branch_name, a.quantity, b.status, b.invoice_no, b.created_at, c.name, SUM(a.quantity * c. price) AS total_purchased, COUNT(a.id) AS total_items
             FROM order_item a
-            JOIN xmart.order b ON a.order_id = b.id
+            JOIN JCWDOL00804.order b ON a.order_id = b.id
             JOIN product c ON c.id = a.product_id
             JOIN branch d ON c.branch_id = d.id
             WHERE b.user_id = ${req.decript.id} 
@@ -117,7 +145,7 @@ module.exports = {
   getOrderDetail: (req, res) => {
     db.query(
       `SELECT a.id, a.user_id, a.status, a.courier, a.shipping_cost, a.invoice_no, a.created_at, b.address, b.city, b.province, b.zipcode 
-      FROM xmart.order a 
+      FROM JCWDOL00804.order a 
       JOIN address b ON a.address_id = b.id 
       WHERE a.id = ${req.params.id}
       AND a.user_id = ${req.decript.id}`,
@@ -161,7 +189,7 @@ module.exports = {
   getPayment: (req, res) => {
     db.query(
       `SELECT o.id, o.user_id, o.status, o.invoice_no, o.created_at, o.payment_img, SUM(i.quantity * p.price + o.shipping_cost) AS total_purchased
-      FROM xmart.order o
+      FROM JCWDOL00804.order o
       JOIN order_item i ON i.order_id = o.id
       JOIN product p ON p.id = i.product_id
       WHERE o.id = ${req.params.id}
@@ -179,7 +207,7 @@ module.exports = {
   },
   uploadPaymentImg: (req, res) => {
     db.query(
-      `UPDATE xmart.order SET ? 
+      `UPDATE JCWDOL00804.order SET ? 
       WHERE id=${req.params.id}`,
       {
         payment_img: `/imgPayment/${req.files[0].filename}`,
@@ -201,7 +229,7 @@ module.exports = {
   },
   cancelOrder: (req, res) => {
     db.query(
-      `UPDATE xmart.order SET ?
+      `UPDATE JCWDOL00804.order SET ?
       WHERE id=${req.params.id}`,
       { status: "Dibatalkan" },
       (error, results) => {

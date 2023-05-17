@@ -112,8 +112,7 @@ module.exports = {
         }
         return result;
       };
-      db.query(
-        `SELECT DATE_FORMAT(b.updated_at, '%b %Y') AS date, SUM((c.price*a.quantity)) as total_sales FROM order_item a JOIN xmart.order b ON a.order_id = b.id JOIN product c ON a.product_id = c.id WHERE c.branch_id = ${branch_id} AND b.status IN ('Menunggu Pembayaran', 'Menunggu Konfirmasi', 'Dibatalkan') AND b.updated_at > DATE_SUB(now(),INTERVAL ${manyMonth} MONTH) GROUP by date`,
+      db.query(`SELECT DATE_FORMAT(b.updated_at, '%b %Y') AS date, SUM((c.price*a.quantity)) as total_sales FROM order_item a JOIN JCWDOL00804.order b ON a.order_id = b.id JOIN product c ON a.product_id = c.id WHERE c.branch_id = ${branch_id} AND b.status IN ('Menunggu Pembayaran', 'Menunggu Konfirmasi', 'Dibatalkan') AND b.updated_at > DATE_SUB(now(),INTERVAL ${manyMonth} MONTH) GROUP by date`,
         (err, results) => {
           if (err) {
             return res.status(500).send({
@@ -138,8 +137,7 @@ module.exports = {
         }
         return result;
       };
-      db.query(
-        `SELECT DATE_FORMAT(b.updated_at, '%Y') AS date, SUM((c.price*a.quantity)) as total_sales FROM order_item a JOIN xmart.order b ON a.order_id = b.id JOIN product c ON a.product_id = c.id WHERE c.branch_id = ${branch_id} AND b.status IN ('Menunggu Pembayaran', 'Menunggu Konfirmasi', 'Dibatalkan') AND b.updated_at > DATE_SUB(now(),INTERVAL ${manyYear} YEAR) GROUP by date`,
+      db.query(`SELECT DATE_FORMAT(b.updated_at, '%Y') AS date, SUM((c.price*a.quantity)) as total_sales FROM order_item a JOIN JCWDOL00804.order b ON a.order_id = b.id JOIN product c ON a.product_id = c.id WHERE c.branch_id = ${branch_id} AND b.status IN ('Menunggu Pembayaran', 'Menunggu Konfirmasi', 'Dibatalkan') AND b.updated_at > DATE_SUB(now(),INTERVAL ${manyYear} YEAR) GROUP by date`,
         (err, results) => {
           if (err) {
             return res.status(500).send({

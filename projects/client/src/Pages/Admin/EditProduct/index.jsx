@@ -154,7 +154,7 @@ const EditProduct = () => {
                 productImg
                   ? !formik.errors.product_img && formik.values.product_img
                     ? URL.createObjectURL(formik.values.product_img)
-                    : `http://localhost:8000/${productImg}`
+                    : `https://jcwdol00804.purwadhikabootcamp.com/${productImg}`
                   : !formik.errors.product_img && formik.values.product_img
                   ? URL.createObjectURL(formik.values.product_img)
                   : addImage

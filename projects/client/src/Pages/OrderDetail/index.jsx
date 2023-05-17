@@ -28,17 +28,19 @@ const OrderDetail = () => {
     } catch (error) {
       toast.error(error.response.data.message);
     }
-  }
+  };
 
   const handleComplete = async () => {
     try {
-      const result = await axios.patch(`${API_URL}/transaction/complete-order/${id}`)
+      const result = await axios.patch(
+        `${API_URL}/transaction/complete-order/${id}`
+      );
       toast.success(result.data.message);
       getOrderDetail();
     } catch (error) {
       toast.error(error.response.data.message);
     }
-  }
+  };
 
   const getOrderDetail = async () => {
     const token = localStorage.getItem("xmart_login");
@@ -59,7 +61,7 @@ const OrderDetail = () => {
         setProductInfo(res[1].data);
       })
       .catch((err) => console.log(err));
-  }
+  };
   useEffect(() => {
     getOrderDetail();
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -110,7 +112,7 @@ const OrderDetail = () => {
                   <div className="flex flex-row items-center justify-between px-5">
                     <div className="flex flex-row items-center mt-1 ">
                       <img
-                        src="https://www.freeiconspng.com/thumbs/no-image-icon/no-image-icon-6.png"
+                        src={`https://jcwdol00804.purwadhikabootcamp.com/${val.product_img}`}
                         alt={val.name}
                         className=" w-12 h-12 mt-2 border text-xs"
                       />
@@ -157,7 +159,7 @@ const OrderDetail = () => {
             <div className="flex flex-col">
               <div className="px-5 font-bold">
                 {orderDetail.status &&
-                  orderDetail.status === "Menunggu Pembayaran"
+                orderDetail.status === "Menunggu Pembayaran"
                   ? "Shopping Summary"
                   : "Payment Detail"}
               </div>
@@ -192,7 +194,7 @@ const OrderDetail = () => {
               <span className="font-bold">
                 {" "}
                 {orderDetail.status &&
-                  orderDetail.status === "Menunggu Pembayaran"
+                orderDetail.status === "Menunggu Pembayaran"
                   ? "Total Shopping"
                   : "Total Payment"}
               </span>
@@ -207,48 +209,48 @@ const OrderDetail = () => {
             </div>
           </div>
         </div>
-        {orderDetail.status
-          && orderDetail.status === "Menunggu Pembayaran"
-          && !modalOrderCancel
-          ? (
-            <div className="self-center mb-16">
-              <button
-                className="mr-2 py-[2px] px-4 bg-red-500 rounded-full text-lg font-semibold shadow-md text-white"
-                onClick={() => setModalOrderCancel(!modalOrderCancel)}
-              >
-                Cancel Order
-              </button>
-              <button
-                className="px-4 py-[2px]  bg-[#82cd47] rounded-full text-lg font-semibold  shadow-md text-white"
-                onClick={() => navigate(`/payment/${id}`)}>
-                Proceed To Payment
-              </button>
-            </div>
-          ) : orderDetail.status
-            && orderDetail.status === "Dikirim"
-            ? (
-              <div className="self-center mb-16">
-                <button
-                  className="mr-2 py-[2px] px-4 w-32 bg-blue-500 rounded-full text-lg font-semibold shadow-md text-white"
-                  onClick={() => setModalOrderComplete(!modalOrderComplete)}
-                >
-                  Confirm
-                </button>
-                <button
-                  className="px-4 py-[2px] w-32 bg-[#82cd47] rounded-full text-lg font-semibold  shadow-md text-white"
-                  onClick={() => navigate(`/order-list`)}>
-                  Back
-                </button>
-              </div>
-            ) : (
-              <div className="self-center mb-16">
-                <button
-                  className="px-4 py-[2px] w-32 bg-[#82cd47] rounded-full text-lg font-semibold  shadow-md text-white"
-                  onClick={() => navigate(`/order-list`)}>
-                  Back
-                </button>
-              </div>
-            )}
+        {orderDetail.status &&
+        orderDetail.status === "Menunggu Pembayaran" &&
+        !modalOrderCancel ? (
+          <div className="self-center mb-16">
+            <button
+              className="mr-2 py-[2px] px-4 bg-red-500 rounded-full text-lg font-semibold shadow-md text-white"
+              onClick={() => setModalOrderCancel(!modalOrderCancel)}
+            >
+              Cancel Order
+            </button>
+            <button
+              className="px-4 py-[2px]  bg-[#82cd47] rounded-full text-lg font-semibold  shadow-md text-white"
+              onClick={() => navigate(`/payment/${id}`)}
+            >
+              Proceed To Payment
+            </button>
+          </div>
+        ) : orderDetail.status && orderDetail.status === "Dikirim" ? (
+          <div className="self-center mb-16">
+            <button
+              className="mr-2 py-[2px] px-4 w-32 bg-blue-500 rounded-full text-lg font-semibold shadow-md text-white"
+              onClick={() => setModalOrderComplete(!modalOrderComplete)}
+            >
+              Confirm
+            </button>
+            <button
+              className="px-4 py-[2px] w-32 bg-[#82cd47] rounded-full text-lg font-semibold  shadow-md text-white"
+              onClick={() => navigate(`/order-list`)}
+            >
+              Back
+            </button>
+          </div>
+        ) : (
+          <div className="self-center mb-16">
+            <button
+              className="px-4 py-[2px] w-32 bg-[#82cd47] rounded-full text-lg font-semibold  shadow-md text-white"
+              onClick={() => navigate(`/order-list`)}
+            >
+              Back
+            </button>
+          </div>
+        )}
       </div>
       {modalOrderCancel ? (
         <div className="container flex justify-center mx-auto">
@@ -275,7 +277,8 @@ const OrderDetail = () => {
               </div>
               <div className="mt-4">
                 <p className="mb-4 text-sm mt-4 text-center">
-                  Are you sure you want to<br />
+                  Are you sure you want to
+                  <br />
                   Cancel this order ?
                 </p>
                 <div className="flex flex-row justify-center">
@@ -292,8 +295,7 @@ const OrderDetail = () => {
                     onClick={() => {
                       setModalOrderCancel(!modalOrderCancel);
                       handleCancel();
-                    }
-                    }
+                    }}
                   >
                     Confirm
                   </button>
@@ -328,8 +330,10 @@ const OrderDetail = () => {
               </div>
               <div className="mt-4">
                 <p className="mb-4 text-sm mt-4 text-center">
-                  Has your order delivered?<br />
-                  Please confirm to<br />
+                  Has your order delivered?
+                  <br />
+                  Please confirm to
+                  <br />
                   Complete this order ?
                 </p>
                 <div className="flex flex-row justify-center">
@@ -346,8 +350,7 @@ const OrderDetail = () => {
                     onClick={() => {
                       setModalOrderComplete(!modalOrderComplete);
                       handleComplete();
-                    }
-                    }
+                    }}
                   >
                     Confirm
                   </button>
